@@ -47,6 +47,7 @@ export default function RegistrationStep({
 }) {
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [mode, setMode] = useState<"signup" | "login">("signup");
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
@@ -77,7 +78,32 @@ export default function RegistrationStep({
       return;
     }
 
-    /* Tenta criar conta */
+    /* Modo login direto */
+    if (mode === "login") {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
+      });
+      if (signInError) {
+        setAuthError("E-mail ou senha incorretos.");
+        setLoading(false);
+        return;
+      }
+      const { data: row } = await supabase
+        .from("bolao_entries").select("*").eq("email", values.email).maybeSingle();
+      if (row) {
+        const entry = rowToEntry(row);
+        const completed = row.completed && Object.keys(row.group_picks || {}).length > 0;
+        onNext(entry, completed ? 3 : 2);
+      } else {
+        const couponCode = initialData.couponCode || generateCoupon();
+        onNext({ ...values, couponCode, timestamp: Date.now() });
+      }
+      setLoading(false);
+      return;
+    }
+
+    /* Tenta criar conta (signup) */
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
@@ -140,9 +166,13 @@ export default function RegistrationStep({
         className="rounded-2xl p-4 text-center border"
         style={{ background: "rgba(255,215,0,0.08)", borderColor: "rgba(255,215,0,0.25)" }}
       >
-        <p className="font-bold text-lg" style={{ color: "#FFD700" }}>🎁 Cadastro = Frete Grátis!</p>
+        <p className="font-bold text-lg" style={{ color: "#FFD700" }}>
+          {mode === "signup" ? "🎁 Cadastro = Frete Grátis!" : "👋 Bem-vindo de volta!"}
+        </p>
         <p className="text-white/55 text-sm mt-1">
-          Crie sua conta gratuita e garanta seu cupom imediatamente.
+          {mode === "signup"
+            ? "Crie sua conta gratuita e garanta seu cupom imediatamente."
+            : "Entre com seu e-mail e senha para ver seus palpites."}
         </p>
       </div>
 
@@ -153,16 +183,18 @@ export default function RegistrationStep({
       >
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField control={form.control} name="name" render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-white/75 font-semibold text-sm">Nome Completo</FormLabel>
-                <FormControl>
-                  <Input placeholder="Seu nome completo" {...field}
-                    className="h-12 text-white placeholder:text-white/25 border" style={inputStyle} />
-                </FormControl>
-                <FormMessage className="text-red-400 text-xs" />
-              </FormItem>
-            )} />
+            {mode === "signup" && (
+              <FormField control={form.control} name="name" render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-white/75 font-semibold text-sm">Nome Completo</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Seu nome completo" {...field}
+                      className="h-12 text-white placeholder:text-white/25 border" style={inputStyle} />
+                  </FormControl>
+                  <FormMessage className="text-red-400 text-xs" />
+                </FormItem>
+              )} />
+            )}
 
             <FormField control={form.control} name="email" render={({ field }) => (
               <FormItem>
@@ -175,16 +207,18 @@ export default function RegistrationStep({
               </FormItem>
             )} />
 
-            <FormField control={form.control} name="whatsapp" render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-white/75 font-semibold text-sm">WhatsApp (apenas números)</FormLabel>
-                <FormControl>
-                  <Input type="tel" placeholder="17999999999" {...field}
-                    className="h-12 text-white placeholder:text-white/25 border" style={inputStyle} />
-                </FormControl>
-                <FormMessage className="text-red-400 text-xs" />
-              </FormItem>
-            )} />
+            {mode === "signup" && (
+              <FormField control={form.control} name="whatsapp" render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-white/75 font-semibold text-sm">WhatsApp (apenas números)</FormLabel>
+                  <FormControl>
+                    <Input type="tel" placeholder="17999999999" {...field}
+                      className="h-12 text-white placeholder:text-white/25 border" style={inputStyle} />
+                  </FormControl>
+                  <FormMessage className="text-red-400 text-xs" />
+                </FormItem>
+              )} />
+            )}
 
             <FormField control={form.control} name="password" render={({ field }) => (
               <FormItem>
@@ -211,12 +245,35 @@ export default function RegistrationStep({
               className="w-full h-14 rounded-xl text-white font-bold text-lg transition-all btn-green-glow hover:opacity-90 active:scale-[0.98]"
               style={{ background: "#00C851", opacity: loading ? 0.7 : 1 }}
             >
-              {loading ? "Verificando..." : "⚽ Garantir Frete Grátis & Iniciar Palpites"}
+              {loading
+                ? "Verificando..."
+                : mode === "signup"
+                  ? "⚽ Garantir Frete Grátis & Iniciar Palpites"
+                  : "🔓 Entrar e Ver Meus Palpites"}
             </button>
 
-            <p className="text-center text-white/30 text-xs">
-              Já participou? Use o mesmo e-mail e senha para continuar de onde parou.
-            </p>
+            {/* Toggle entre cadastro e login */}
+            <div className="text-center pt-1">
+              {mode === "signup" ? (
+                <button
+                  type="button"
+                  onClick={() => { setMode("login"); setAuthError(""); }}
+                  className="text-sm font-semibold transition-colors hover:opacity-80"
+                  style={{ color: "#0057FF" }}
+                >
+                  Já tenho conta — Entrar
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => { setMode("signup"); setAuthError(""); }}
+                  className="text-sm font-semibold transition-colors hover:opacity-80"
+                  style={{ color: "#00C851" }}
+                >
+                  Criar nova conta
+                </button>
+              )}
+            </div>
           </form>
         </Form>
       </div>
