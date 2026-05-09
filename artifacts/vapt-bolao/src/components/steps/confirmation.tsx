@@ -73,7 +73,7 @@ export default function ConfirmationStep({ data }: { data: EntryData }) {
   }, []);
 
   const shareMessage = encodeURIComponent(
-    `🏆⚽ Fiz minha aposta no Bolão Copa 2026 da VAPT!\n\nParticipe também: ${BOLAO_URL}\n\nUse meu cupom *${data.couponCode}* e ganhe frete grátis no app VAPT! 🛵`
+    `🏆⚽ Participei do Bolão Copa 2026 da VAPT!\n\nÉ *gratuito* e você já ganha um cupom de frete grátis só por participar! 🛵\n\nFaz o seu também: ${BOLAO_URL}`
   );
   const shareUrl = `https://wa.me/?text=${shareMessage}`;
 
