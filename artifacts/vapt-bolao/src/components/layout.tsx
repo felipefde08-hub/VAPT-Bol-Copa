@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
+
+const LineupModal = lazy(() => import("@/components/lineup-modal"));
 
 const vaptLogo = "/vapt-logo.jpeg";
 const VAPT_SITE = "https://vaptbr.com";
@@ -9,6 +11,7 @@ export default function Layout({ children, step }: { children: React.ReactNode; 
   const progressValue = step === 1 ? 33 : step === 2 ? 66 : 100;
   const [logoError, setLogoError] = useState(false);
   const [participants, setParticipants] = useState(0);
+  const [showLineup, setShowLineup] = useState(false);
 
   useEffect(() => {
     /* Simula contador crescente a partir de um base salvo em localStorage */
@@ -26,6 +29,13 @@ export default function Layout({ children, step }: { children: React.ReactNode; 
 
   return (
     <div className="min-h-[100dvh] flex flex-col relative overflow-hidden font-sans">
+      {/* Modal de escalação */}
+      {showLineup && (
+        <Suspense fallback={null}>
+          <LineupModal onClose={() => setShowLineup(false)} />
+        </Suspense>
+      )}
+
       {/* Barra de progresso fixa no topo */}
       <div className="fixed top-0 left-0 w-full h-1.5 z-50" style={{ background: "rgba(255,255,255,0.08)" }}>
         <div
@@ -78,6 +88,22 @@ export default function Layout({ children, step }: { children: React.ReactNode; 
           <span className="text-white/70 text-xs font-sans">
             <span className="font-bold text-white">{participants.toLocaleString("pt-BR")}</span> participantes
           </span>
+        </div>
+
+        {/* Botão escalação */}
+        <div className="flex justify-center mb-2">
+          <button
+            onClick={() => setShowLineup(true)}
+            className="inline-flex items-center gap-2 font-bold text-sm px-5 py-2 rounded-full border transition-all hover:opacity-90 active:scale-95"
+            style={{
+              background: "rgba(0,87,255,0.15)",
+              borderColor: "rgba(0,87,255,0.4)",
+              color: "#fff",
+              boxShadow: "0 0 12px rgba(0,87,255,0.2)",
+            }}
+          >
+            🏟️ Monte a Escalação
+          </button>
         </div>
 
         {/* Steps */}
