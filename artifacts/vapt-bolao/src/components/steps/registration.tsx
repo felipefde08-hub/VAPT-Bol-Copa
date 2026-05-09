@@ -5,13 +5,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { EntryData } from "@/pages/bolao";
-import { supabase } from "@/lib/supabase";
 
 const schema = z.object({
-  name:      z.string().min(2, "Nome é obrigatório"),
-  email:     z.string().email("E-mail inválido"),
-  whatsapp:  z.string().min(10, "Mínimo 10 dígitos").regex(/^[0-9]+$/, "Apenas números"),
-  password:  z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+  name:     z.string().min(2, "Nome é obrigatório"),
+  email:    z.string().email("E-mail inválido"),
+  whatsapp: z.string().min(10, "Mínimo 10 dígitos").regex(/^[0-9]+$/, "Apenas números"),
 });
 
 const PRIZES = [
@@ -21,23 +19,6 @@ const PRIZES = [
   { icon: "🧤", label: "Melhor Goleiro",              value: "Cupom R$30"  },
 ];
 
-function rowToEntry(row: Record<string, unknown>): Partial<EntryData> {
-  return {
-    name:           row.name as string,
-    email:          row.email as string,
-    whatsapp:       row.whatsapp as string,
-    couponCode:     row.coupon_code as string,
-    timestamp:      row.timestamp as number,
-    groupPicks:     (row.group_picks as Record<string, string[]>) || {},
-    champion:       (row.champion as string) || "",
-    runnerUp:       (row.runner_up as string) || "",
-    topScorer:      (row.top_scorer as string) || "",
-    bestPlayer:     (row.best_player as string) || "",
-    bestGoalkeeper: (row.best_goalkeeper as string) || "",
-    neymarGoesCopa: row.neymar_goes_copa as boolean | null,
-  };
-}
-
 export default function RegistrationStep({
   onNext,
   initialData,
@@ -46,8 +27,6 @@ export default function RegistrationStep({
   initialData: Partial<EntryData>;
 }) {
   const [loading, setLoading] = useState(false);
-  const [authError, setAuthError] = useState("");
-  const [mode, setMode] = useState<"signup" | "login">("signup");
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
@@ -55,7 +34,6 @@ export default function RegistrationStep({
       name:     initialData.name     || "",
       email:    initialData.email    || "",
       whatsapp: initialData.whatsapp || "",
-      password: "",
     },
   });
 
@@ -67,88 +45,7 @@ export default function RegistrationStep({
   };
 
   const onSubmit = async (values: z.infer<typeof schema>) => {
-    setAuthError("");
     setLoading(true);
-
-    /* Sem Supabase configurado → prossegue normalmente */
-    if (!supabase) {
-      const couponCode = initialData.couponCode || generateCoupon();
-      onNext({ ...values, couponCode, timestamp: initialData.timestamp || Date.now() });
-      setLoading(false);
-      return;
-    }
-
-    /* Modo login direto */
-    if (mode === "login") {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: values.email,
-        password: values.password,
-      });
-      if (signInError) {
-        setAuthError("E-mail ou senha incorretos.");
-        setLoading(false);
-        return;
-      }
-      const { data: row } = await supabase
-        .from("bolao_entries").select("*").eq("email", values.email).maybeSingle();
-      if (row) {
-        const entry = rowToEntry(row);
-        const completed = row.completed && Object.keys(row.group_picks || {}).length > 0;
-        onNext(entry, completed ? 3 : 2);
-      } else {
-        const couponCode = initialData.couponCode || generateCoupon();
-        onNext({ ...values, couponCode, timestamp: Date.now() });
-      }
-      setLoading(false);
-      return;
-    }
-
-    /* Tenta criar conta (signup) */
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email: values.email,
-      password: values.password,
-      options: { data: { name: values.name } },
-    });
-
-    /* Novo usuário confirmado: sem erro e com identities */
-    const isNewUser = !signUpError && (signUpData?.user?.identities?.length ?? 0) > 0;
-
-    if (isNewUser) {
-      /* Conta criada com sucesso → gera cupom e avança */
-      const couponCode = initialData.couponCode || generateCoupon();
-      onNext({ ...values, couponCode, timestamp: initialData.timestamp || Date.now() });
-      setLoading(false);
-      return;
-    }
-
-    /* Email já existe (qualquer outro caso) → tenta fazer login */
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: values.email,
-      password: values.password,
-    });
-
-    if (signInError) {
-      setAuthError("E-mail ou senha incorretos.");
-      setLoading(false);
-      return;
-    }
-
-    /* Login ok — carrega dados existentes */
-    const { data: row } = await supabase
-      .from("bolao_entries")
-      .select("*")
-      .eq("email", values.email)
-      .maybeSingle();
-
-    if (row) {
-      const entry = rowToEntry(row);
-      const completed = row.completed && Object.keys(row.group_picks || {}).length > 0;
-      onNext(entry, completed ? 3 : 2);
-      setLoading(false);
-      return;
-    }
-
-    /* Login ok mas sem entrada ainda → gera cupom e avança */
     const couponCode = initialData.couponCode || generateCoupon();
     onNext({ ...values, couponCode, timestamp: initialData.timestamp || Date.now() });
     setLoading(false);
@@ -166,13 +63,9 @@ export default function RegistrationStep({
         className="rounded-2xl p-4 text-center border"
         style={{ background: "rgba(255,215,0,0.08)", borderColor: "rgba(255,215,0,0.25)" }}
       >
-        <p className="font-bold text-lg" style={{ color: "#FFD700" }}>
-          {mode === "signup" ? "🎁 Cadastro = Frete Grátis!" : "👋 Bem-vindo de volta!"}
-        </p>
+        <p className="font-bold text-lg" style={{ color: "#FFD700" }}>🎁 É Grátis e já garante Frete Grátis!</p>
         <p className="text-white/55 text-sm mt-1">
-          {mode === "signup"
-            ? "Crie sua conta gratuita e garanta seu cupom imediatamente."
-            : "Entre com seu e-mail e senha para ver seus palpites."}
+          Preencha seus dados, faça seus palpites e ganhe cupons exclusivos VAPT.
         </p>
       </div>
 
@@ -183,18 +76,16 @@ export default function RegistrationStep({
       >
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {mode === "signup" && (
-              <FormField control={form.control} name="name" render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-white/75 font-semibold text-sm">Nome Completo</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Seu nome completo" {...field}
-                      className="h-12 text-white placeholder:text-white/25 border" style={inputStyle} />
-                  </FormControl>
-                  <FormMessage className="text-red-400 text-xs" />
-                </FormItem>
-              )} />
-            )}
+            <FormField control={form.control} name="name" render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-white/75 font-semibold text-sm">Nome Completo</FormLabel>
+                <FormControl>
+                  <Input placeholder="Seu nome completo" {...field}
+                    className="h-12 text-white placeholder:text-white/25 border" style={inputStyle} />
+                </FormControl>
+                <FormMessage className="text-red-400 text-xs" />
+              </FormItem>
+            )} />
 
             <FormField control={form.control} name="email" render={({ field }) => (
               <FormItem>
@@ -207,37 +98,16 @@ export default function RegistrationStep({
               </FormItem>
             )} />
 
-            {mode === "signup" && (
-              <FormField control={form.control} name="whatsapp" render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-white/75 font-semibold text-sm">WhatsApp (apenas números)</FormLabel>
-                  <FormControl>
-                    <Input type="tel" placeholder="17999999999" {...field}
-                      className="h-12 text-white placeholder:text-white/25 border" style={inputStyle} />
-                  </FormControl>
-                  <FormMessage className="text-red-400 text-xs" />
-                </FormItem>
-              )} />
-            )}
-
-            <FormField control={form.control} name="password" render={({ field }) => (
+            <FormField control={form.control} name="whatsapp" render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-white/75 font-semibold text-sm">
-                  Senha <span className="text-white/35 font-normal">(para acessar seus palpites depois)</span>
-                </FormLabel>
+                <FormLabel className="text-white/75 font-semibold text-sm">WhatsApp (apenas números)</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="Mínimo 6 caracteres" {...field}
+                  <Input type="tel" placeholder="17999999999" {...field}
                     className="h-12 text-white placeholder:text-white/25 border" style={inputStyle} />
                 </FormControl>
                 <FormMessage className="text-red-400 text-xs" />
               </FormItem>
             )} />
-
-            {authError && (
-              <div className="rounded-xl p-3 text-center text-sm" style={{ background: "rgba(255,68,68,0.1)", color: "#FF6666" }}>
-                {authError}
-              </div>
-            )}
 
             <button
               type="submit"
@@ -245,35 +115,8 @@ export default function RegistrationStep({
               className="w-full h-14 rounded-xl text-white font-bold text-lg transition-all btn-green-glow hover:opacity-90 active:scale-[0.98]"
               style={{ background: "#00C851", opacity: loading ? 0.7 : 1 }}
             >
-              {loading
-                ? "Verificando..."
-                : mode === "signup"
-                  ? "⚽ Garantir Frete Grátis & Iniciar Palpites"
-                  : "🔓 Entrar e Ver Meus Palpites"}
+              {loading ? "Aguarde..." : "⚽ Garantir Frete Grátis & Iniciar Palpites"}
             </button>
-
-            {/* Toggle entre cadastro e login */}
-            <div className="text-center pt-1">
-              {mode === "signup" ? (
-                <button
-                  type="button"
-                  onClick={() => { setMode("login"); setAuthError(""); }}
-                  className="text-sm font-semibold transition-colors hover:opacity-80"
-                  style={{ color: "#0057FF" }}
-                >
-                  Já tenho conta — Entrar
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => { setMode("signup"); setAuthError(""); }}
-                  className="text-sm font-semibold transition-colors hover:opacity-80"
-                  style={{ color: "#00C851" }}
-                >
-                  Criar nova conta
-                </button>
-              )}
-            </div>
           </form>
         </Form>
       </div>
