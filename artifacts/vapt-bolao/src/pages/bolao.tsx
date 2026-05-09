@@ -27,6 +27,7 @@ const STORAGE_KEY = "vapt-bolao-entry";
 export default function BolaoApp() {
   const [step, setStep] = useState(1);
   const [entryData, setEntryData] = useState<Partial<EntryData>>({});
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   /* Restaura do localStorage ao abrir o app */
   useEffect(() => {
@@ -67,7 +68,7 @@ export default function BolaoApp() {
         coupon_code: newData.couponCode!,
         timestamp:   newData.timestamp!,
         completed:   false,
-      });
+      }).then(err => setSaveError(err));
     }
 
     if (step === 2 && newData.email) {
@@ -94,6 +95,15 @@ export default function BolaoApp() {
 
   return (
     <Layout step={step} onBack={step > 1 ? handlePrevStep : undefined}>
+      {saveError && (
+        <div
+          className="fixed bottom-4 left-4 right-4 z-50 rounded-xl p-3 text-xs text-white font-mono"
+          style={{ background: "rgba(200,0,0,0.9)" }}
+          onClick={() => setSaveError(null)}
+        >
+          ❌ Erro ao salvar: {saveError}
+        </div>
+      )}
       <AnimatePresence mode="wait">
         <motion.div
           key={step}

@@ -21,10 +21,11 @@ export type BolaoEntry = {
   completed?: boolean;
 };
 
-export async function saveEntry(entry: BolaoEntry): Promise<void> {
+export async function saveEntry(entry: BolaoEntry): Promise<string | null> {
   if (!supabase) {
-    console.error("❌ Supabase não configurado — verifique as env vars VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no Vercel.");
-    return;
+    const msg = "Supabase não configurado (env vars ausentes no Vercel)";
+    console.error("❌", msg);
+    return msg;
   }
 
   // Tenta INSERT primeiro
@@ -33,11 +34,11 @@ export async function saveEntry(entry: BolaoEntry): Promise<void> {
     .insert(entry);
 
   if (!insertError) {
-    console.log("✅ Salvo (insert):", entry.email);
-    return;
+    console.log("✅ Salvo:", entry.email);
+    return null;
   }
 
-  // Se o email já existe (código 23505 = unique violation), faz UPDATE
+  // Email já existe → UPDATE
   if (insertError.code === "23505") {
     const { error: updateError } = await supabase
       .from("bolao_entries")
@@ -45,12 +46,15 @@ export async function saveEntry(entry: BolaoEntry): Promise<void> {
       .eq("email", entry.email);
 
     if (!updateError) {
-      console.log("✅ Atualizado (update):", entry.email);
-    } else {
-      console.error("❌ Update falhou:", updateError.message, updateError.details);
+      console.log("✅ Atualizado:", entry.email);
+      return null;
     }
-    return;
+    const msg = `Update falhou: ${updateError.message}`;
+    console.error("❌", msg);
+    return msg;
   }
 
-  console.error("❌ Insert falhou:", insertError.message, insertError.details, insertError.hint);
+  const msg = `Insert falhou: ${insertError.message} (code: ${insertError.code})`;
+  console.error("❌", msg);
+  return msg;
 }
