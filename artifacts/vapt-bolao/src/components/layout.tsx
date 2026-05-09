@@ -167,6 +167,16 @@ export default function Layout({ children, step, onBack }: { children: React.Rea
         >
           🛵 Compre já e use o cupom de frete grátis!
         </a>
+
+        <div className="mt-6">
+          <a
+            href="#/admin"
+            className="text-white/15 hover:text-white/40 transition-colors"
+            style={{ fontSize: "10px" }}
+          >
+            admin
+          </a>
+        </div>
       </footer>
     </div>
   );
