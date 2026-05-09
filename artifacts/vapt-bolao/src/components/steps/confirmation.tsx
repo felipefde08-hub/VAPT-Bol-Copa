@@ -2,7 +2,7 @@ import React, { useMemo, useEffect, useState } from "react";
 import { EntryData } from "@/pages/bolao";
 import { saveEntry } from "@/lib/supabase";
 
-const BOLAO_URL = "https://vapt-bol-copa-vapt-bolao-git-main-vapt.vercel.app";
+const BOLAO_URL = typeof window !== "undefined" ? window.location.origin : "";
 
 const CONFETTI_COLORS = ["#FFD700", "#0057FF", "#00C851", "#FF6B6B", "#FFA500", "#FF69B4", "#00BFFF"];
 
