@@ -21,12 +21,11 @@ export type BolaoEntry = {
   completed?: boolean;
 };
 
-export async function saveEntry(entry: BolaoEntry): Promise<{ error: string | null }> {
-  if (!supabase) return { error: "Supabase não configurado" };
-
-  const { error } = await supabase
+/* Usuários anônimos só precisam de INSERT + UPDATE (upsert por email).
+   Nenhum SELECT é feito aqui — anônimos não lêem os dados. */
+export async function saveEntry(entry: BolaoEntry): Promise<void> {
+  if (!supabase) return;
+  await supabase
     .from("bolao_entries")
     .upsert(entry, { onConflict: "email" });
-
-  return { error: error?.message ?? null };
 }
