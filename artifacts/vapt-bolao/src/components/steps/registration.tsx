@@ -78,16 +78,17 @@ export default function RegistrationStep({
     }
 
     /* Tenta criar conta */
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
       options: { data: { name: values.name } },
     });
 
+    /* Email já existe: erro explícito OU identities vazio (comportamento do Supabase) */
     const alreadyExists =
-      signUpError?.message?.toLowerCase().includes("already registered") ||
-      signUpError?.message?.toLowerCase().includes("already been registered") ||
-      signUpError?.status === 422;
+      signUpError?.message?.toLowerCase().includes("already") ||
+      signUpError?.status === 422 ||
+      (signUpData?.user?.identities?.length === 0);
 
     if (signUpError && !alreadyExists) {
       setAuthError("Erro ao criar conta. Tente novamente.");
