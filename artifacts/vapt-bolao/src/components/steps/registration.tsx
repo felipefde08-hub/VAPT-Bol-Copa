@@ -84,48 +84,45 @@ export default function RegistrationStep({
       options: { data: { name: values.name } },
     });
 
-    /* Email já existe: erro explícito OU identities vazio (comportamento do Supabase) */
-    const alreadyExists =
-      signUpError?.message?.toLowerCase().includes("already") ||
-      signUpError?.status === 422 ||
-      (signUpData?.user?.identities?.length === 0);
+    /* Novo usuário confirmado: sem erro e com identities */
+    const isNewUser = !signUpError && (signUpData?.user?.identities?.length ?? 0) > 0;
 
-    if (signUpError && !alreadyExists) {
-      setAuthError("Erro ao criar conta. Tente novamente.");
+    if (isNewUser) {
+      /* Conta criada com sucesso → gera cupom e avança */
+      const couponCode = initialData.couponCode || generateCoupon();
+      onNext({ ...values, couponCode, timestamp: initialData.timestamp || Date.now() });
       setLoading(false);
       return;
     }
 
-    if (alreadyExists) {
-      /* Email já existe — faz login */
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: values.email,
-        password: values.password,
-      });
+    /* Email já existe (qualquer outro caso) → tenta fazer login */
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: values.email,
+      password: values.password,
+    });
 
-      if (signInError) {
-        setAuthError("Senha incorreta para este e-mail.");
-        setLoading(false);
-        return;
-      }
-
-      /* Carrega dados existentes */
-      const { data: row } = await supabase
-        .from("bolao_entries")
-        .select("*")
-        .eq("email", values.email)
-        .maybeSingle();
-
-      if (row) {
-        const entry = rowToEntry(row);
-        const completed = row.completed && Object.keys(row.group_picks || {}).length > 0;
-        onNext(entry, completed ? 3 : 2);
-        setLoading(false);
-        return;
-      }
+    if (signInError) {
+      setAuthError("E-mail ou senha incorretos.");
+      setLoading(false);
+      return;
     }
 
-    /* Conta criada (nova) → gera cupom e avança */
+    /* Login ok — carrega dados existentes */
+    const { data: row } = await supabase
+      .from("bolao_entries")
+      .select("*")
+      .eq("email", values.email)
+      .maybeSingle();
+
+    if (row) {
+      const entry = rowToEntry(row);
+      const completed = row.completed && Object.keys(row.group_picks || {}).length > 0;
+      onNext(entry, completed ? 3 : 2);
+      setLoading(false);
+      return;
+    }
+
+    /* Login ok mas sem entrada ainda → gera cupom e avança */
     const couponCode = initialData.couponCode || generateCoupon();
     onNext({ ...values, couponCode, timestamp: initialData.timestamp || Date.now() });
     setLoading(false);
