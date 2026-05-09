@@ -1,6 +1,0 @@
-{
-  "framework": null,
-  "installCommand": "cd ../.. && npx --yes pnpm@11 install --ignore-scripts",
-  "buildCommand": "cd ../.. && BASE_PATH=/ npx --yes pnpm@11 --filter @workspace/vapt-bolao run build",
-  "outputDirectory": "dist/public"
-}
