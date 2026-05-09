@@ -1,5 +1,6 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import { EntryData } from "@/pages/bolao";
+import { saveEntry } from "@/lib/supabase";
 
 const BOLAO_URL = "https://vapt-bol-copa-vapt-bolao-git-main-vapt.vercel.app";
 
@@ -49,6 +50,28 @@ const SUMMARY_ROWS = [
 ];
 
 export default function ConfirmationStep({ data }: { data: EntryData }) {
+  const [saved, setSaved] = useState<"idle" | "saving" | "ok" | "error">("idle");
+
+  useEffect(() => {
+    setSaved("saving");
+    saveEntry({
+      name: data.name,
+      email: data.email,
+      whatsapp: data.whatsapp,
+      coupon_code: data.couponCode,
+      timestamp: data.timestamp,
+      group_picks: data.groupPicks,
+      champion: data.champion,
+      runner_up: data.runnerUp,
+      top_scorer: data.topScorer,
+      best_player: data.bestPlayer,
+      best_goalkeeper: data.bestGoalkeeper,
+      neymar_goes_copa: data.neymarGoesCopa ?? null,
+    }).then(({ error }) => {
+      setSaved(error ? "error" : "ok");
+    });
+  }, []);
+
   const shareMessage = encodeURIComponent(
     `🏆⚽ Fiz minha aposta no Bolão Copa 2026 da VAPT!\n\nParticipe também: ${BOLAO_URL}\n\nUse meu cupom *${data.couponCode}* e ganhe frete grátis no app VAPT! 🛵`
   );
@@ -59,6 +82,19 @@ export default function ConfirmationStep({ data }: { data: EntryData }) {
   return (
     <div className="space-y-6 slide-up">
       <Confetti />
+
+      {/* Status do save */}
+      {saved === "saving" && (
+        <div className="flex items-center justify-center gap-2 text-white/40 text-xs font-sans">
+          <span className="w-3 h-3 rounded-full border-2 border-white/30 border-t-white/80 animate-spin" />
+          Salvando seu palpite...
+        </div>
+      )}
+      {saved === "ok" && (
+        <div className="flex items-center justify-center gap-2 text-xs font-sans" style={{ color: "#00C851" }}>
+          <span>✓</span> Palpite salvo com sucesso!
+        </div>
+      )}
 
       {/* Celebração */}
       <div className="text-center space-y-3 pt-2">
