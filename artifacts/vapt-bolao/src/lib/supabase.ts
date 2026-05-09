@@ -1,13 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 
-const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+const url  = import.meta.env.VITE_SUPABASE_URL  as string | undefined;
+const key  = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
 export const supabase = url && key ? createClient(url, key) : null;
-
-if (!supabase) {
-  console.warn("⚠️ Supabase não configurado. Verifique VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.");
-}
 
 export type BolaoEntry = {
   name: string;
@@ -27,17 +23,34 @@ export type BolaoEntry = {
 
 export async function saveEntry(entry: BolaoEntry): Promise<void> {
   if (!supabase) {
-    console.error("❌ saveEntry: Supabase client is null. Env vars ausentes no Vercel.");
+    console.error("❌ Supabase não configurado — verifique as env vars VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no Vercel.");
     return;
   }
 
-  const { error } = await supabase
+  // Tenta INSERT primeiro
+  const { error: insertError } = await supabase
     .from("bolao_entries")
-    .upsert(entry, { onConflict: "email" });
+    .insert(entry);
 
-  if (error) {
-    console.error("❌ saveEntry error:", error.message, error.details, error.hint);
-  } else {
-    console.log("✅ Entrada salva:", entry.email);
+  if (!insertError) {
+    console.log("✅ Salvo (insert):", entry.email);
+    return;
   }
+
+  // Se o email já existe (código 23505 = unique violation), faz UPDATE
+  if (insertError.code === "23505") {
+    const { error: updateError } = await supabase
+      .from("bolao_entries")
+      .update(entry)
+      .eq("email", entry.email);
+
+    if (!updateError) {
+      console.log("✅ Atualizado (update):", entry.email);
+    } else {
+      console.error("❌ Update falhou:", updateError.message, updateError.details);
+    }
+    return;
+  }
+
+  console.error("❌ Insert falhou:", insertError.message, insertError.details, insertError.hint);
 }
