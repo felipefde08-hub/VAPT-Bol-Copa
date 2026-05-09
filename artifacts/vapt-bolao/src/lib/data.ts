@@ -1,86 +1,90 @@
 export const GROUPS = {
   "Grupo A": [
     { name: "México", flag: "🇲🇽" },
-    { name: "Canadá", flag: "🇨🇦" },
-    { name: "EUA", flag: "🇺🇸" },
-    { name: "Suécia", flag: "🇸🇪" }
+    { name: "África do Sul", flag: "🇿🇦" },
+    { name: "Coreia do Sul", flag: "🇰🇷" },
+    { name: "Rep. Tcheca", flag: "🇨🇿" }
   ],
   "Grupo B": [
-    { name: "Argentina", flag: "🇦🇷" },
-    { name: "Equador", flag: "🇪🇨" },
-    { name: "Peru", flag: "🇵🇪" },
-    { name: "Japão", flag: "🇯🇵" }
+    { name: "Canadá", flag: "🇨🇦" },
+    { name: "Bósnia", flag: "🇧🇦" },
+    { name: "Catar", flag: "🇶🇦" },
+    { name: "Suíça", flag: "🇨🇭" }
   ],
   "Grupo C": [
     { name: "Brasil", flag: "🇧🇷" },
-    { name: "Colômbia", flag: "🇨🇴" },
-    { name: "Paraguai", flag: "🇵🇾" },
-    { name: "Marrocos", flag: "🇲🇦" }
+    { name: "Marrocos", flag: "🇲🇦" },
+    { name: "Haiti", flag: "🇭🇹" },
+    { name: "Escócia", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" }
   ],
   "Grupo D": [
-    { name: "França", flag: "🇫🇷" },
-    { name: "Alemanha", flag: "🇩🇪" },
-    { name: "Portugal", flag: "🇵🇹" },
-    { name: "Argélia", flag: "🇩🇿" }
+    { name: "Estados Unidos", flag: "🇺🇸" },
+    { name: "Paraguai", flag: "🇵🇾" },
+    { name: "Austrália", flag: "🇦🇺" },
+    { name: "Turquia", flag: "🇹🇷" }
   ],
   "Grupo E": [
-    { name: "Espanha", flag: "🇪🇸" },
-    { name: "Inglaterra", flag: "🇬🇧" },
-    { name: "Holanda", flag: "🇳🇱" },
-    { name: "Senegal", flag: "🇸🇳" }
+    { name: "Alemanha", flag: "🇩🇪" },
+    { name: "Curaçao", flag: "🇨🇼" },
+    { name: "Costa do Marfim", flag: "🇨🇮" },
+    { name: "Equador", flag: "🇪🇨" }
   ],
   "Grupo F": [
-    { name: "Bélgica", flag: "🇧🇪" },
-    { name: "Croácia", flag: "🇭🇷" },
-    { name: "Dinamarca", flag: "🇩🇰" },
-    { name: "México", flag: "🇲🇽" }
+    { name: "Holanda", flag: "🇳🇱" },
+    { name: "Japão", flag: "🇯🇵" },
+    { name: "Suécia", flag: "🇸🇪" },
+    { name: "Tunísia", flag: "🇹🇳" }
   ],
   "Grupo G": [
-    { name: "Uruguai", flag: "🇺🇾" },
-    { name: "Chile", flag: "🇨🇱" },
-    { name: "Bolívia", flag: "🇧🇴" },
+    { name: "Bélgica", flag: "🇧🇪" },
+    { name: "Egito", flag: "🇪🇬" },
+    { name: "Irã", flag: "🇮🇷" },
     { name: "Nova Zelândia", flag: "🇳🇿" }
   ],
   "Grupo H": [
-    { name: "Itália", flag: "🇮🇹" },
-    { name: "Turquia", flag: "🇹🇷" },
-    { name: "Ucrânia", flag: "🇺🇦" },
-    { name: "Costa Rica", flag: "🇨🇷" }
+    { name: "Espanha", flag: "🇪🇸" },
+    { name: "Cabo Verde", flag: "🇨🇻" },
+    { name: "Arábia Saudita", flag: "🇸🇦" },
+    { name: "Uruguai", flag: "🇺🇾" }
   ],
   "Grupo I": [
-    { name: "Coreia do Sul", flag: "🇰🇷" },
-    { name: "Austrália", flag: "🇦🇺" },
-    { name: "Arábia Saudita", flag: "🇸🇦" },
-    { name: "Gana", flag: "🇬🇭" }
+    { name: "França", flag: "🇫🇷" },
+    { name: "Senegal", flag: "🇸🇳" },
+    { name: "Repescagem Intercontinental 2", flag: "🌐" },
+    { name: "Noruega", flag: "🇳🇴" }
   ],
   "Grupo J": [
-    { name: "Irã", flag: "🇮🇷" },
-    { name: "Egito", flag: "🇪🇬" },
-    { name: "Nigéria", flag: "🇳🇬" },
-    { name: "Escócia", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" }
+    { name: "Argentina", flag: "🇦🇷" },
+    { name: "Argélia", flag: "🇩🇿" },
+    { name: "Áustria", flag: "🇦🇹" },
+    { name: "Jordânia", flag: "🇯🇴" }
   ],
   "Grupo K": [
-    { name: "Polônia", flag: "🇵🇱" },
-    { name: "Romênia", flag: "🇷🇴" },
-    { name: "Rep. Tcheca", flag: "🇨🇿" },
-    { name: "Venezuela", flag: "🇻🇪" }
+    { name: "Portugal", flag: "🇵🇹" },
+    { name: "RD Congo", flag: "🇨🇩" },
+    { name: "Uzbequistão", flag: "🇺🇿" },
+    { name: "Colômbia", flag: "🇨🇴" }
   ],
   "Grupo L": [
-    { name: "Suíça", flag: "🇨🇭" },
-    { name: "Noruega", flag: "🇳🇴" },
-    { name: "Áustria", flag: "🇦🇹" },
-    { name: "Jamaica", flag: "🇯🇲" }
+    { name: "Inglaterra", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
+    { name: "Croácia", flag: "🇭🇷" },
+    { name: "Gana", flag: "🇬🇭" },
+    { name: "Panamá", flag: "🇵🇦" }
   ]
 };
 
 export const ALL_TEAMS = [
-  "EUA", "México", "Canadá", "Costa Rica", "Jamaica", "Honduras", "El Salvador", 
-  "Panamá", "Trinidad e Tobago", "Guatemala", "Brasil", "Argentina", "Uruguai", 
-  "Colômbia", "Chile", "Equador", "Peru", "Paraguai", "Bolívia", "Venezuela", 
-  "França", "Inglaterra", "Espanha", "Alemanha", "Portugal", "Itália", "Holanda", 
-  "Bélgica", "Croácia", "Dinamarca", "Suíça", "Noruega", "Polônia", "Turquia", 
-  "Áustria", "Ucrânia", "Escócia", "Romênia", "Rep. Tcheca", "Suécia", "Eslováquia", 
-  "Grécia", "Marrocos", "Senegal", "Nigéria", "Egito", "Gana", "Argélia", "Camarões", 
-  "Costa do Marfim", "Japão", "Coreia do Sul", "Austrália", "Arábia Saudita", "Irã", 
-  "Nova Zelândia"
+  "México", "África do Sul", "Coreia do Sul", "Rep. Tcheca",
+  "Canadá", "Bósnia", "Catar", "Suíça",
+  "Brasil", "Marrocos", "Haiti", "Escócia",
+  "Estados Unidos", "Paraguai", "Austrália", "Turquia",
+  "Alemanha", "Curaçao", "Costa do Marfim", "Equador",
+  "Holanda", "Japão", "Suécia", "Tunísia",
+  "Bélgica", "Egito", "Irã", "Nova Zelândia",
+  "Espanha", "Cabo Verde", "Arábia Saudita", "Uruguai",
+  "França", "Senegal", "Noruega",
+  "Argentina", "Argélia", "Áustria", "Jordânia",
+  "Portugal", "RD Congo", "Uzbequistão", "Colômbia",
+  "Inglaterra", "Croácia", "Gana", "Panamá",
+  "Repescagem Intercontinental 2"
 ].sort();
