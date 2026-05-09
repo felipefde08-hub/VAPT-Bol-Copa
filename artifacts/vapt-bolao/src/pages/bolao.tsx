@@ -4,7 +4,7 @@ import RegistrationStep from "@/components/steps/registration";
 import PredictionsStep from "@/components/steps/predictions";
 import ConfirmationStep from "@/components/steps/confirmation";
 import Layout from "@/components/layout";
-import { saveEntry } from "@/lib/supabase";
+import { saveEntry, supabase } from "@/lib/supabase";
 
 export type EntryData = {
   name: string;
@@ -23,23 +23,62 @@ export type EntryData = {
 
 const STORAGE_KEY = "vapt-bolao-entry";
 
+function rowToEntryData(row: Record<string, unknown>): Partial<EntryData> {
+  return {
+    name:            row.name as string,
+    email:           row.email as string,
+    whatsapp:        row.whatsapp as string,
+    couponCode:      row.coupon_code as string,
+    timestamp:       row.timestamp as number,
+    groupPicks:      (row.group_picks as Record<string, string[]>) || {},
+    champion:        (row.champion as string) || "",
+    runnerUp:        (row.runner_up as string) || "",
+    topScorer:       (row.top_scorer as string) || "",
+    bestPlayer:      (row.best_player as string) || "",
+    bestGoalkeeper:  (row.best_goalkeeper as string) || "",
+    neymarGoesCopa:  row.neymar_goes_copa as boolean | null,
+  };
+}
+
 export default function BolaoApp() {
   const [step, setStep] = useState(1);
   const [entryData, setEntryData] = useState<Partial<EntryData>>({});
 
+  /* Restaura sessão existente ao abrir o app */
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed.couponCode) {
-          setEntryData(parsed);
-          setStep(parsed.groupPicks && Object.keys(parsed.groupPicks).length > 0 ? 3 : 2);
+    async function restoreSession() {
+      /* 1. Tenta Supabase (usuário já logado em outro dispositivo) */
+      if (supabase) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.email) {
+          const { data: row } = await supabase
+            .from("bolao_entries")
+            .select("*")
+            .eq("email", session.user.email)
+            .maybeSingle();
+          if (row) {
+            const entry = rowToEntryData(row);
+            setEntryData(entry);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(entry));
+            setStep((row.completed && Object.keys(row.group_picks || {}).length > 0) ? 3 : 2);
+            return;
+          }
         }
-      } catch (e) {
-        console.error("Failed to parse saved data", e);
+      }
+
+      /* 2. Fallback: localStorage */
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed.couponCode) {
+            setEntryData(parsed);
+            setStep(parsed.groupPicks && Object.keys(parsed.groupPicks).length > 0 ? 3 : 2);
+          }
+        } catch { /* ignore */ }
       }
     }
+    restoreSession();
   }, []);
 
   const updateData = (data: Partial<EntryData>) => {
@@ -54,41 +93,41 @@ export default function BolaoApp() {
     window.scrollTo(0, 0);
   };
 
-  const handleNextStep = (data: Partial<EntryData>) => {
+  /* targetStep permite pular direto pro passo certo (ex: já completou tudo) */
+  const handleNextStep = (data: Partial<EntryData>, targetStep?: number) => {
     const newData = updateData(data);
+    const nextStep = targetStep ?? step + 1;
 
-    // Passo 1 → salva lead imediatamente (parcial)
     if (step === 1 && newData.email) {
       saveEntry({
-        name: newData.name!,
-        email: newData.email!,
-        whatsapp: newData.whatsapp!,
+        name:        newData.name!,
+        email:       newData.email!,
+        whatsapp:    newData.whatsapp!,
         coupon_code: newData.couponCode!,
-        timestamp: newData.timestamp!,
-        completed: false,
+        timestamp:   newData.timestamp!,
+        completed:   false,
       });
     }
 
-    // Passo 2 → salva palpite completo
     if (step === 2 && newData.email) {
       saveEntry({
-        name: newData.name!,
-        email: newData.email!,
-        whatsapp: newData.whatsapp!,
-        coupon_code: newData.couponCode!,
-        timestamp: newData.timestamp!,
-        group_picks: newData.groupPicks,
-        champion: newData.champion,
-        runner_up: newData.runnerUp,
-        top_scorer: newData.topScorer,
-        best_player: newData.bestPlayer,
-        best_goalkeeper: newData.bestGoalkeeper,
+        name:             newData.name!,
+        email:            newData.email!,
+        whatsapp:         newData.whatsapp!,
+        coupon_code:      newData.couponCode!,
+        timestamp:        newData.timestamp!,
+        group_picks:      newData.groupPicks,
+        champion:         newData.champion,
+        runner_up:        newData.runnerUp,
+        top_scorer:       newData.topScorer,
+        best_player:      newData.bestPlayer,
+        best_goalkeeper:  newData.bestGoalkeeper,
         neymar_goes_copa: newData.neymarGoesCopa ?? null,
-        completed: true,
+        completed:        true,
       });
     }
 
-    setStep(step + 1);
+    setStep(nextStep);
     window.scrollTo(0, 0);
   };
 
