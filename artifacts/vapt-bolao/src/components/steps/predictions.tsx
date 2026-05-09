@@ -4,6 +4,7 @@ import { GROUPS, ALL_TEAMS } from "@/lib/data";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ATACANTES, GOLEIROS } from "@/lib/players";
 
 function TeamFlag({ code, name }: { code: string | null; name: string }) {
   const [err, setErr] = useState(false);
@@ -22,11 +23,11 @@ function TeamFlag({ code, name }: { code: string | null; name: string }) {
 }
 
 const SPECIAL_BETS = [
-  { key: "champion", label: "🏆 Campeão", prize: "Cupom R$150", isSelect: true },
-  { key: "runnerUp", label: "🥈 Vice-Campeão", prize: "Cupom R$80", isSelect: true },
-  { key: "topScorer", label: "⚽ Artilheiro", prize: "Cupom R$50", isSelect: false, placeholder: "Ex: Vini Jr" },
-  { key: "bestPlayer", label: "⭐ Melhor Jogador", prize: "Cupom R$50", isSelect: false, placeholder: "Nome do jogador" },
-  { key: "bestGoalkeeper", label: "🧤 Melhor Goleiro", prize: "Cupom R$30", isSelect: false, placeholder: "Nome do goleiro" },
+  { key: "champion",       label: "🏆 Campeão",       prize: "Cupom R$150", type: "team"    },
+  { key: "runnerUp",       label: "🥈 Vice-Campeão",   prize: "Cupom R$80",  type: "team"    },
+  { key: "topScorer",      label: "⚽ Artilheiro",     prize: "Cupom R$50",  type: "player"  },
+  { key: "bestPlayer",     label: "⭐ Melhor Jogador", prize: "Cupom R$50",  type: "player"  },
+  { key: "bestGoalkeeper", label: "🧤 Melhor Goleiro", prize: "Cupom R$30",  type: "keeper"  },
 ] as const;
 
 export default function PredictionsStep({
@@ -195,7 +196,7 @@ export default function PredictionsStep({
                     {bet.prize}
                   </span>
                 </div>
-                {bet.isSelect ? (
+                {bet.type === "team" ? (
                   <Select value={value} onValueChange={setValue}>
                     <SelectTrigger
                       className="h-12 text-white border"
@@ -213,16 +214,28 @@ export default function PredictionsStep({
                     </SelectContent>
                   </Select>
                 ) : (
-                  <Input
-                    value={value}
-                    onChange={(e) => setValue(e.target.value)}
-                    placeholder={"placeholder" in bet ? bet.placeholder : ""}
-                    className="h-12 text-white placeholder:text-white/25 border"
-                    style={{
-                      background: "rgba(255,255,255,0.07)",
-                      borderColor: value ? "rgba(0,87,255,0.5)" : "rgba(255,255,255,0.15)",
-                    }}
-                  />
+                  <>
+                    <Input
+                      value={value}
+                      onChange={(e) => setValue(e.target.value)}
+                      placeholder={
+                        bet.type === "keeper"
+                          ? "Digite ou escolha o goleiro..."
+                          : "Digite ou escolha o jogador..."
+                      }
+                      list={`list-${bet.key}`}
+                      className="h-12 text-white placeholder:text-white/25 border"
+                      style={{
+                        background: "rgba(255,255,255,0.07)",
+                        borderColor: value ? "rgba(0,87,255,0.5)" : "rgba(255,255,255,0.15)",
+                      }}
+                    />
+                    <datalist id={`list-${bet.key}`}>
+                      {(bet.type === "keeper" ? GOLEIROS : ATACANTES).map((p) => (
+                        <option key={p} value={p} />
+                      ))}
+                    </datalist>
+                  </>
                 )}
               </div>
             );
