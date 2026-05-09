@@ -177,12 +177,13 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
   const [search, setSearch] = useState("");
 
   const fetch = useCallback(async () => {
-    if (!supabase) return;
+    if (!supabase) { setLoading(false); return; }
     setLoading(true);
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("bolao_entries")
       .select("*")
       .order("created_at", { ascending: false });
+    if (error) console.error("❌ Admin fetch error:", error.message, error.details);
     setEntries(data || []);
     setLoading(false);
   }, []);
@@ -276,7 +277,10 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
           {loading ? (
             <div className="py-20 text-center text-white/40">Carregando...</div>
           ) : filtered.length === 0 ? (
-            <div className="py-20 text-center text-white/40">Nenhum participante encontrado</div>
+            <div className="py-20 text-center space-y-2">
+              <p className="text-white/40">Nenhum participante encontrado</p>
+              {!search && <p className="text-white/25 text-xs">Os cadastros feitos antes da configuração do Supabase não foram salvos.<br/>Novos cadastros aparecerão aqui automaticamente.</p>}
+            </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left" style={{ borderCollapse: "collapse" }}>
