@@ -14,10 +14,10 @@ const schema = z.object({
 });
 
 const PRIZES = [
-  { icon: "🏆", label: "Acertar o Campeão",          value: "Cupom R$150" },
-  { icon: "🥈", label: "Acertar o Vice-Campeão",      value: "Cupom R$80"  },
-  { icon: "⚽", label: "Artilheiro / Melhor Jogador", value: "Cupom R$50"  },
-  { icon: "🧤", label: "Melhor Goleiro",              value: "Cupom R$30"  },
+  { icon: "🏆", label: "Acertar o Campeão",          value: "Cupom R$50"       },
+  { icon: "🥈", label: "Acertar o Vice-Campeão",      value: "10% de desconto"  },
+  { icon: "⚽", label: "Artilheiro / Melhor Jogador", value: "10% de desconto"  },
+  { icon: "🧤", label: "Melhor Goleiro",              value: "10% de desconto"  },
 ];
 
 function rowToEntry(row: Record<string, unknown>): Partial<EntryData> {
