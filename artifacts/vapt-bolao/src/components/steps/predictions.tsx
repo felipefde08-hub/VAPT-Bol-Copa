@@ -151,7 +151,7 @@ export default function PredictionsStep({
                       }}
                     >
                       <TeamFlag code={team.code} name={team.name} />
-                      <span className="text-xs font-bold text-white leading-tight text-center line-clamp-2">
+                      <span className="text-xs font-bold text-white leading-tight text-center break-words w-full">
                         {team.name}
                       </span>
                       {isSelected && (
@@ -206,7 +206,7 @@ export default function PredictionsStep({
                     >
                       <SelectValue placeholder={`Selecione ${bet.key === "champion" ? "o campeão" : "o vice"}`} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-72 overflow-y-auto">
                       {ALL_TEAMS.map((t) => (
                         <SelectItem key={t} value={t}>{t}</SelectItem>
                       ))}
