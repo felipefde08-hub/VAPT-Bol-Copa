@@ -61,6 +61,13 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
         className="w-full max-w-sm rounded-2xl p-8 border"
         style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,215,0,0.2)" }}
       >
+        <a
+          href="#/"
+          className="flex items-center gap-1 text-white/40 hover:text-white text-sm mb-6 transition-colors"
+        >
+          ← Voltar ao Bolão
+        </a>
+
         <div className="text-center mb-8">
           <div className="text-4xl mb-3">🔐</div>
           <h1 className="font-display text-3xl text-white">ADMIN</h1>
@@ -224,6 +231,13 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
         style={{ background: "rgba(10,10,26,0.95)", backdropFilter: "blur(8px)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
       >
         <div className="flex items-center gap-3">
+          <a
+            href="#/"
+            className="text-white/40 hover:text-white transition-colors text-xl mr-1"
+            title="Voltar ao Bolão"
+          >
+            ←
+          </a>
           <span className="text-2xl">🏆</span>
           <div>
             <p className="font-display text-xl text-white leading-none">ADMIN — BOLÃO COPA 2026</p>
