@@ -1,44 +1,138 @@
-import React from "react";
-import { Progress } from "@/components/ui/progress";
-import vaptLogo from "@assets/WhatsApp_Image_2026-03-09_at_11.37.13_1778335683435.jpeg";
+import React, { useState, useEffect } from "react";
+
+const vaptLogo = "/vapt-logo.jpeg";
+const VAPT_SITE = "https://vaptbr.com";
+
+const STEP_LABELS = ["Cadastro", "Palpites", "Cupom"];
 
 export default function Layout({ children, step }: { children: React.ReactNode; step: number }) {
   const progressValue = step === 1 ? 33 : step === 2 ? 66 : 100;
+  const [logoError, setLogoError] = useState(false);
+  const [participants, setParticipants] = useState(0);
+
+  useEffect(() => {
+    /* Simula contador crescente a partir de um base salvo em localStorage */
+    const base = parseInt(localStorage.getItem("vapt-participant-base") || "0", 10) || 1240;
+    setParticipants(base);
+    const interval = setInterval(() => {
+      setParticipants(prev => {
+        const next = prev + Math.floor(Math.random() * 3);
+        localStorage.setItem("vapt-participant-base", String(next));
+        return next;
+      });
+    }, 8000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-background relative overflow-hidden font-sans">
-      <div className="absolute top-0 left-0 w-full h-1 bg-primary z-50">
-        <Progress value={progressValue} className="h-1 rounded-none bg-primary/20" />
+    <div className="min-h-[100dvh] flex flex-col relative overflow-hidden font-sans">
+      {/* Barra de progresso fixa no topo */}
+      <div className="fixed top-0 left-0 w-full h-1.5 z-50" style={{ background: "rgba(255,255,255,0.08)" }}>
+        <div
+          className="h-full transition-all duration-700 ease-out"
+          style={{
+            width: `${progressValue}%`,
+            background: "linear-gradient(90deg, #FFD700, #FFA500, #FFD700)",
+            backgroundSize: "200% 100%",
+            animation: "gold-shimmer 3s linear infinite",
+          }}
+        />
       </div>
 
-      <header className="pt-8 pb-6 px-4 text-center relative z-10">
-        <div className="flex justify-center mb-3">
-          <img
-            src={vaptLogo}
-            alt="VAPT"
-            className="h-14 w-auto rounded-xl"
-          />
+      {/* Header */}
+      <header className="pt-10 pb-6 px-4 text-center relative z-10">
+        {/* Logo */}
+        <div className="flex justify-center mb-4">
+          <a href={VAPT_SITE} target="_blank" rel="noopener noreferrer" className="inline-block">
+            {!logoError ? (
+              <img
+                src={vaptLogo}
+                alt="VAPT"
+                className="h-14 w-auto rounded-xl shadow-lg"
+                onError={() => setLogoError(true)}
+              />
+            ) : (
+              <span className="text-3xl font-display font-bold" style={{ color: "#0057FF" }}>VAPT</span>
+            )}
+          </a>
         </div>
-        <h1 className="text-3xl font-display mt-1 uppercase tracking-wide text-foreground">
-          Bolão Copa by VAPT
+
+        {/* Troféu animado */}
+        <div className="mb-2">
+          <span className="trophy-bounce text-5xl">🏆</span>
+        </div>
+
+        {/* Título dourado */}
+        <h1 className="text-gold-shimmer font-display text-4xl md:text-5xl leading-tight mb-2">
+          BOLÃO COPA 2026
         </h1>
-        {step < 3 && (
-          <p className="text-muted-foreground mt-2 font-medium max-w-sm mx-auto">
-            Participe, faça seus palpites e ganhe cupons de desconto exclusivos no app VAPT!
-          </p>
-        )}
+
+        {/* Subtítulo */}
+        <p className="text-white/60 text-sm font-sans mb-4">
+          Faça seus palpites e ganhe cupons exclusivos
+        </p>
+
+        {/* Contador de participantes */}
+        <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 mb-5">
+          <span className="w-2 h-2 rounded-full bg-[#00C851] animate-pulse" />
+          <span className="text-white/70 text-xs font-sans">
+            <span className="font-bold text-white">{participants.toLocaleString("pt-BR")}</span> participantes
+          </span>
+        </div>
+
+        {/* Steps */}
+        <div className="flex justify-center gap-3">
+          {STEP_LABELS.map((label, i) => {
+            const s = i + 1;
+            const done = s < step;
+            const active = s === step;
+            return (
+              <div key={s} className="flex flex-col items-center gap-1">
+                <div
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300"
+                  style={{
+                    background: done ? "#FFD700" : active ? "#0057FF" : "rgba(255,255,255,0.1)",
+                    color: done ? "#0a0a1a" : "#fff",
+                    boxShadow: active ? "0 0 12px rgba(0,87,255,0.6)" : "none",
+                  }}
+                >
+                  {done ? "✓" : s}
+                </div>
+                <span className={`text-[10px] font-sans ${active ? "text-white" : "text-white/40"}`}>{label}</span>
+              </div>
+            );
+          })}
+        </div>
       </header>
 
-      <main className="flex-1 flex flex-col px-4 pb-20 relative z-10">
+      {/* Conteúdo */}
+      <main className="flex-1 flex flex-col px-4 pb-28 relative z-10">
         {children}
       </main>
 
-      <footer className="mt-auto py-8 bg-card border-t border-border text-center px-4 relative z-10">
-        <div className="flex justify-center mb-2">
-          <img src={vaptLogo} alt="VAPT" className="h-8 w-auto rounded-lg" />
-        </div>
-        <p className="text-sm font-medium text-foreground mb-1">Pediu, chegou em até 1 hora · vaptbr.com</p>
-        <p className="text-xs text-muted-foreground">São José do Rio Preto, SP</p>
+      {/* Footer */}
+      <footer
+        className="py-8 text-center px-4 relative z-10 border-t"
+        style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.25)", backdropFilter: "blur(8px)" }}
+      >
+        <a href={VAPT_SITE} target="_blank" rel="noopener noreferrer" className="inline-block mb-3">
+          {!logoError ? (
+            <img src={vaptLogo} alt="VAPT" className="h-8 w-auto rounded-lg mx-auto" />
+          ) : (
+            <span className="font-display text-xl" style={{ color: "#0057FF" }}>VAPT</span>
+          )}
+        </a>
+        <p className="text-sm font-medium text-white/70 mb-1">Pediu, chegou em até 1 hora · vaptbr.com</p>
+        <p className="text-xs text-white/40 mb-5">São José do Rio Preto, SP</p>
+        <a
+          href={VAPT_SITE}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 font-bold text-sm px-6 py-3 rounded-xl text-white transition-all btn-green-glow hover:opacity-90"
+          style={{ background: "#00C851" }}
+        >
+          🛵 Compre já e use o cupom de frete grátis!
+        </a>
       </footer>
     </div>
   );

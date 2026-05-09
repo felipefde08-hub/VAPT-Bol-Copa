@@ -1,16 +1,38 @@
 import React, { useState } from "react";
 import { EntryData } from "@/pages/bolao";
 import { GROUPS, ALL_TEAMS } from "@/lib/data";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export default function PredictionsStep({ 
-  onNext, 
-  initialData 
-}: { 
+function TeamFlag({ code, name }: { code: string | null; name: string }) {
+  const [err, setErr] = useState(false);
+  if (!code || err) {
+    return <span className="text-2xl w-10 text-center flex-shrink-0">🌐</span>;
+  }
+  return (
+    <img
+      src={`https://flagcdn.com/48x36/${code}.png`}
+      srcSet={`https://flagcdn.com/96x72/${code}.png 2x`}
+      alt={name}
+      className="w-10 h-[30px] object-cover rounded flex-shrink-0"
+      onError={() => setErr(true)}
+    />
+  );
+}
+
+const SPECIAL_BETS = [
+  { key: "champion", label: "🏆 Campeão", prize: "Cupom R$150", isSelect: true },
+  { key: "runnerUp", label: "🥈 Vice-Campeão", prize: "Cupom R$80", isSelect: true },
+  { key: "topScorer", label: "⚽ Artilheiro", prize: "Cupom R$50", isSelect: false, placeholder: "Ex: Vini Jr" },
+  { key: "bestPlayer", label: "⭐ Melhor Jogador", prize: "Cupom R$50", isSelect: false, placeholder: "Nome do jogador" },
+  { key: "bestGoalkeeper", label: "🧤 Melhor Goleiro", prize: "Cupom R$30", isSelect: false, placeholder: "Nome do goleiro" },
+] as const;
+
+export default function PredictionsStep({
+  onNext,
+  initialData,
+}: {
   onNext: (data: Partial<EntryData>) => void;
   initialData: Partial<EntryData>;
 }) {
@@ -21,175 +43,210 @@ export default function PredictionsStep({
   const [bestPlayer, setBestPlayer] = useState(initialData.bestPlayer || "");
   const [bestGoalkeeper, setBestGoalkeeper] = useState(initialData.bestGoalkeeper || "");
 
+  const stateMap: Record<string, [string, (v: string) => void]> = {
+    champion: [champion, setChampion],
+    runnerUp: [runnerUp, setRunnerUp],
+    topScorer: [topScorer, setTopScorer],
+    bestPlayer: [bestPlayer, setBestPlayer],
+    bestGoalkeeper: [bestGoalkeeper, setBestGoalkeeper],
+  };
+
   const handleGroupToggle = (groupName: string, teamName: string) => {
-    setGroupPicks(prev => {
-      const currentPicks = prev[groupName] || [];
-      if (currentPicks.includes(teamName)) {
-        return { ...prev, [groupName]: currentPicks.filter(t => t !== teamName) };
-      } else if (currentPicks.length < 2) {
-        return { ...prev, [groupName]: [...currentPicks, teamName] };
-      }
+    setGroupPicks((prev) => {
+      const cur = prev[groupName] || [];
+      if (cur.includes(teamName)) return { ...prev, [groupName]: cur.filter((t) => t !== teamName) };
+      if (cur.length < 2) return { ...prev, [groupName]: [...cur, teamName] };
       return prev;
     });
   };
 
+  const completedGroups = Object.keys(GROUPS).filter((g) => groupPicks[g]?.length === 2).length;
+  const totalGroups = Object.keys(GROUPS).length;
+
   const isFormValid = () => {
-    const groupsValid = Object.keys(GROUPS).every(group => groupPicks[group]?.length === 2);
+    const groupsValid = Object.keys(GROUPS).every((g) => groupPicks[g]?.length === 2);
     return groupsValid && champion && runnerUp && topScorer && bestPlayer && bestGoalkeeper;
   };
 
   const handleSubmit = () => {
-    if (isFormValid()) {
-      onNext({
-        groupPicks,
-        champion,
-        runnerUp,
-        topScorer,
-        bestPlayer,
-        bestGoalkeeper
-      });
-    }
+    if (isFormValid()) onNext({ groupPicks, champion, runnerUp, topScorer, bestPlayer, bestGoalkeeper });
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 slide-up">
+      {/* Header grupos */}
       <div className="text-center">
-        <h2 className="text-2xl font-display mb-2">Fase de Grupos</h2>
-        <p className="text-muted-foreground text-sm">Selecione os 2 times que avançam em cada grupo.</p>
+        <h2 className="font-display text-2xl text-white mb-1">Fase de Grupos</h2>
+        <p className="text-white/50 text-sm">Selecione os 2 times que avançam em cada grupo</p>
+        <div className="inline-flex items-center gap-2 mt-3 bg-white/5 border border-white/10 rounded-full px-4 py-1.5">
+          <span className="text-xs text-white/60 font-sans">
+            Grupos completos:{" "}
+            <span className="font-bold" style={{ color: completedGroups === totalGroups ? "#00C851" : "#FFD700" }}>
+              {completedGroups}/{totalGroups}
+            </span>
+          </span>
+        </div>
       </div>
 
-      <div className="grid gap-6">
+      {/* Grupos */}
+      <div className="grid gap-4">
         {Object.entries(GROUPS).map(([groupName, teams]) => {
           const picks = groupPicks[groupName] || [];
           const isComplete = picks.length === 2;
 
           return (
-            <Card key={groupName} className={`border-2 transition-colors ${isComplete ? 'border-secondary/50' : 'border-transparent'}`}>
-              <CardHeader className="py-4 bg-muted/50 border-b">
-                <CardTitle className="text-lg font-display flex justify-between items-center">
-                  <span>{groupName}</span>
-                  <span className={`text-sm ${isComplete ? 'text-secondary font-bold' : 'text-muted-foreground font-sans'}`}>
-                    {picks.length}/2
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 grid gap-2">
-                {teams.map(team => {
+            <div
+              key={groupName}
+              className="rounded-2xl overflow-hidden border transition-all duration-300"
+              style={{
+                borderColor: isComplete ? "rgba(255,215,0,0.4)" : "rgba(255,255,255,0.08)",
+                boxShadow: isComplete ? "0 0 20px rgba(255,215,0,0.08)" : "none",
+              }}
+            >
+              {/* Header do grupo */}
+              <div
+                className="flex justify-between items-center px-4 py-3"
+                style={{ background: "#0057FF" }}
+              >
+                <span className="font-display text-xl text-white">{groupName}</span>
+                <span
+                  className="text-sm font-bold font-sans"
+                  style={{ color: isComplete ? "#FFD700" : "rgba(255,255,255,0.6)" }}
+                >
+                  {picks.length}/2 selecionados
+                </span>
+              </div>
+
+              {/* Grid de times — 2 colunas */}
+              <div
+                className="p-3 grid grid-cols-2 gap-2"
+                style={{ background: "rgba(255,255,255,0.02)" }}
+              >
+                {teams.map((team) => {
                   const isSelected = picks.includes(team.name);
                   const disabled = !isSelected && picks.length >= 2;
-                  
+
                   return (
                     <button
                       key={team.name}
                       type="button"
                       disabled={disabled}
                       onClick={() => handleGroupToggle(groupName, team.name)}
-                      className={`flex items-center justify-between p-3 rounded-lg border-2 text-left transition-all ${
-                        isSelected 
-                          ? 'border-primary bg-primary/5 shadow-sm' 
-                          : disabled 
-                            ? 'border-transparent opacity-50 bg-muted/30 cursor-not-allowed' 
-                            : 'border-border bg-background hover:border-primary/30'
-                      }`}
+                      className="flex flex-col items-center gap-2 p-3 rounded-xl border-2 text-center transition-all duration-200"
+                      style={{
+                        borderColor: isSelected
+                          ? "#FFD700"
+                          : disabled
+                          ? "rgba(255,255,255,0.03)"
+                          : "rgba(255,255,255,0.1)",
+                        background: isSelected
+                          ? "rgba(0,87,255,0.2)"
+                          : disabled
+                          ? "rgba(255,255,255,0.01)"
+                          : "rgba(255,255,255,0.04)",
+                        boxShadow: isSelected ? "0 0 14px rgba(255,215,0,0.25)" : "none",
+                        opacity: disabled ? 0.35 : 1,
+                        cursor: disabled ? "not-allowed" : "pointer",
+                        transform: isSelected ? "scale(1.01)" : "scale(1)",
+                      }}
                     >
-                      <span className="font-semibold text-foreground flex items-center gap-2">
-                        <span className="text-xl">{team.flag}</span>
+                      <TeamFlag code={team.code} name={team.name} />
+                      <span className="text-xs font-bold text-white leading-tight text-center line-clamp-2">
                         {team.name}
                       </span>
                       {isSelected && (
-                        <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs">
+                        <div
+                          className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                          style={{ background: "#FFD700", color: "#0a0a1a" }}
+                        >
                           ✓
                         </div>
                       )}
                     </button>
                   );
                 })}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           );
         })}
       </div>
 
-      <div className="border-t pt-8">
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-display mb-2">Apostas Especiais</h2>
-          <p className="text-muted-foreground text-sm">Quem vai brilhar na Copa?</p>
+      {/* Apostas Especiais */}
+      <div
+        className="rounded-2xl border overflow-hidden"
+        style={{ borderColor: "rgba(255,255,255,0.1)" }}
+      >
+        <div
+          className="px-4 py-3 flex items-center gap-2"
+          style={{ background: "rgba(255,215,0,0.1)", borderBottom: "1px solid rgba(255,215,0,0.15)" }}
+        >
+          <span className="text-xl">⭐</span>
+          <span className="font-display text-xl text-white">Apostas Especiais</span>
         </div>
 
-        <div className="space-y-6">
-          <Card>
-            <CardContent className="p-5 space-y-5">
-              <div className="space-y-2">
-                <Label className="text-base font-bold text-primary">🏆 Campeão (Cupom R$150)</Label>
-                <Select value={champion} onValueChange={setChampion}>
-                  <SelectTrigger className="h-12 text-base">
-                    <SelectValue placeholder="Selecione o campeão" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ALL_TEAMS.map(t => (
-                      <SelectItem key={t} value={t}>{t}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+        <div className="p-4 space-y-5" style={{ background: "rgba(255,255,255,0.02)" }}>
+          {SPECIAL_BETS.map((bet) => {
+            const [value, setValue] = stateMap[bet.key];
+            return (
+              <div key={bet.key} className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label className="text-white/80 font-semibold text-sm">{bet.label}</Label>
+                  <span className="text-xs font-bold" style={{ color: "#FFD700" }}>
+                    {bet.prize}
+                  </span>
+                </div>
+                {bet.isSelect ? (
+                  <Select value={value} onValueChange={setValue}>
+                    <SelectTrigger
+                      className="h-12 text-white border"
+                      style={{
+                        background: "rgba(255,255,255,0.07)",
+                        borderColor: value ? "rgba(0,87,255,0.5)" : "rgba(255,255,255,0.15)",
+                      }}
+                    >
+                      <SelectValue placeholder={`Selecione ${bet.key === "champion" ? "o campeão" : "o vice"}`} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ALL_TEAMS.map((t) => (
+                        <SelectItem key={t} value={t}>{t}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input
+                    value={value}
+                    onChange={(e) => setValue(e.target.value)}
+                    placeholder={"placeholder" in bet ? bet.placeholder : ""}
+                    className="h-12 text-white placeholder:text-white/25 border"
+                    style={{
+                      background: "rgba(255,255,255,0.07)",
+                      borderColor: value ? "rgba(0,87,255,0.5)" : "rgba(255,255,255,0.15)",
+                    }}
+                  />
+                )}
               </div>
-
-              <div className="space-y-2">
-                <Label className="text-base font-bold">🥈 Vice-campeão (Cupom R$80)</Label>
-                <Select value={runnerUp} onValueChange={setRunnerUp}>
-                  <SelectTrigger className="h-12 text-base">
-                    <SelectValue placeholder="Selecione o vice" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ALL_TEAMS.map(t => (
-                      <SelectItem key={t} value={t}>{t}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-base font-bold">⚽ Artilheiro (Cupom R$50)</Label>
-                <Input 
-                  value={topScorer} 
-                  onChange={e => setTopScorer(e.target.value)} 
-                  placeholder="Ex: Vini Jr" 
-                  className="h-12"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-base font-bold">⭐ Melhor Jogador (Cupom R$50)</Label>
-                <Input 
-                  value={bestPlayer} 
-                  onChange={e => setBestPlayer(e.target.value)} 
-                  placeholder="Nome do jogador" 
-                  className="h-12"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-base font-bold">🧤 Melhor Goleiro (Cupom R$30)</Label>
-                <Input 
-                  value={bestGoalkeeper} 
-                  onChange={e => setBestGoalkeeper(e.target.value)} 
-                  placeholder="Nome do goleiro" 
-                  className="h-12"
-                />
-              </div>
-            </CardContent>
-          </Card>
+            );
+          })}
         </div>
       </div>
 
-      <div className="pt-4 sticky bottom-4 z-20">
-        <Button 
-          size="lg" 
-          className="w-full h-14 text-lg font-bold shadow-xl" 
+      {/* Botão finalizar — sticky */}
+      <div className="sticky bottom-4 z-20 pt-2">
+        <button
+          className="w-full h-14 rounded-xl font-bold text-lg transition-all"
           disabled={!isFormValid()}
           onClick={handleSubmit}
+          style={{
+            background: isFormValid() ? "#00C851" : "rgba(255,255,255,0.08)",
+            color: isFormValid() ? "#fff" : "rgba(255,255,255,0.3)",
+            boxShadow: isFormValid() ? "0 0 24px rgba(0,200,81,0.4)" : "none",
+            cursor: isFormValid() ? "pointer" : "not-allowed",
+          }}
         >
-          Finalizar Palpites
-        </Button>
+          {isFormValid()
+            ? "✅ Finalizar Palpites!"
+            : `Complete os grupos (${completedGroups}/${totalGroups}) e apostas especiais`}
+        </button>
       </div>
     </div>
   );

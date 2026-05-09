@@ -1,75 +1,75 @@
 export const GROUPS = {
   "Grupo A": [
-    { name: "México", flag: "🇲🇽" },
-    { name: "África do Sul", flag: "🇿🇦" },
-    { name: "Coreia do Sul", flag: "🇰🇷" },
-    { name: "Rep. Tcheca", flag: "🇨🇿" }
+    { name: "México", flag: "🇲🇽", code: "mx" },
+    { name: "África do Sul", flag: "🇿🇦", code: "za" },
+    { name: "Coreia do Sul", flag: "🇰🇷", code: "kr" },
+    { name: "Rep. Tcheca", flag: "🇨🇿", code: "cz" }
   ],
   "Grupo B": [
-    { name: "Canadá", flag: "🇨🇦" },
-    { name: "Bósnia", flag: "🇧🇦" },
-    { name: "Catar", flag: "🇶🇦" },
-    { name: "Suíça", flag: "🇨🇭" }
+    { name: "Canadá", flag: "🇨🇦", code: "ca" },
+    { name: "Bósnia", flag: "🇧🇦", code: "ba" },
+    { name: "Catar", flag: "🇶🇦", code: "qa" },
+    { name: "Suíça", flag: "🇨🇭", code: "ch" }
   ],
   "Grupo C": [
-    { name: "Brasil", flag: "🇧🇷" },
-    { name: "Marrocos", flag: "🇲🇦" },
-    { name: "Haiti", flag: "🇭🇹" },
-    { name: "Escócia", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" }
+    { name: "Brasil", flag: "🇧🇷", code: "br" },
+    { name: "Marrocos", flag: "🇲🇦", code: "ma" },
+    { name: "Haiti", flag: "🇭🇹", code: "ht" },
+    { name: "Escócia", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", code: "gb-sct" }
   ],
   "Grupo D": [
-    { name: "Estados Unidos", flag: "🇺🇸" },
-    { name: "Paraguai", flag: "🇵🇾" },
-    { name: "Austrália", flag: "🇦🇺" },
-    { name: "Turquia", flag: "🇹🇷" }
+    { name: "Estados Unidos", flag: "🇺🇸", code: "us" },
+    { name: "Paraguai", flag: "🇵🇾", code: "py" },
+    { name: "Austrália", flag: "🇦🇺", code: "au" },
+    { name: "Turquia", flag: "🇹🇷", code: "tr" }
   ],
   "Grupo E": [
-    { name: "Alemanha", flag: "🇩🇪" },
-    { name: "Curaçao", flag: "🇨🇼" },
-    { name: "Costa do Marfim", flag: "🇨🇮" },
-    { name: "Equador", flag: "🇪🇨" }
+    { name: "Alemanha", flag: "🇩🇪", code: "de" },
+    { name: "Curaçao", flag: "🇨🇼", code: "cw" },
+    { name: "Costa do Marfim", flag: "🇨🇮", code: "ci" },
+    { name: "Equador", flag: "🇪🇨", code: "ec" }
   ],
   "Grupo F": [
-    { name: "Holanda", flag: "🇳🇱" },
-    { name: "Japão", flag: "🇯🇵" },
-    { name: "Suécia", flag: "🇸🇪" },
-    { name: "Tunísia", flag: "🇹🇳" }
+    { name: "Holanda", flag: "🇳🇱", code: "nl" },
+    { name: "Japão", flag: "🇯🇵", code: "jp" },
+    { name: "Suécia", flag: "🇸🇪", code: "se" },
+    { name: "Tunísia", flag: "🇹🇳", code: "tn" }
   ],
   "Grupo G": [
-    { name: "Bélgica", flag: "🇧🇪" },
-    { name: "Egito", flag: "🇪🇬" },
-    { name: "Irã", flag: "🇮🇷" },
-    { name: "Nova Zelândia", flag: "🇳🇿" }
+    { name: "Bélgica", flag: "🇧🇪", code: "be" },
+    { name: "Egito", flag: "🇪🇬", code: "eg" },
+    { name: "Irã", flag: "🇮🇷", code: "ir" },
+    { name: "Nova Zelândia", flag: "🇳🇿", code: "nz" }
   ],
   "Grupo H": [
-    { name: "Espanha", flag: "🇪🇸" },
-    { name: "Cabo Verde", flag: "🇨🇻" },
-    { name: "Arábia Saudita", flag: "🇸🇦" },
-    { name: "Uruguai", flag: "🇺🇾" }
+    { name: "Espanha", flag: "🇪🇸", code: "es" },
+    { name: "Cabo Verde", flag: "🇨🇻", code: "cv" },
+    { name: "Arábia Saudita", flag: "🇸🇦", code: "sa" },
+    { name: "Uruguai", flag: "🇺🇾", code: "uy" }
   ],
   "Grupo I": [
-    { name: "França", flag: "🇫🇷" },
-    { name: "Senegal", flag: "🇸🇳" },
-    { name: "Repescagem Intercontinental 2", flag: "🌐" },
-    { name: "Noruega", flag: "🇳🇴" }
+    { name: "França", flag: "🇫🇷", code: "fr" },
+    { name: "Senegal", flag: "🇸🇳", code: "sn" },
+    { name: "Repescagem Intercontinental 2", flag: "🌐", code: null },
+    { name: "Noruega", flag: "🇳🇴", code: "no" }
   ],
   "Grupo J": [
-    { name: "Argentina", flag: "🇦🇷" },
-    { name: "Argélia", flag: "🇩🇿" },
-    { name: "Áustria", flag: "🇦🇹" },
-    { name: "Jordânia", flag: "🇯🇴" }
+    { name: "Argentina", flag: "🇦🇷", code: "ar" },
+    { name: "Argélia", flag: "🇩🇿", code: "dz" },
+    { name: "Áustria", flag: "🇦🇹", code: "at" },
+    { name: "Jordânia", flag: "🇯🇴", code: "jo" }
   ],
   "Grupo K": [
-    { name: "Portugal", flag: "🇵🇹" },
-    { name: "RD Congo", flag: "🇨🇩" },
-    { name: "Uzbequistão", flag: "🇺🇿" },
-    { name: "Colômbia", flag: "🇨🇴" }
+    { name: "Portugal", flag: "🇵🇹", code: "pt" },
+    { name: "RD Congo", flag: "🇨🇩", code: "cd" },
+    { name: "Uzbequistão", flag: "🇺🇿", code: "uz" },
+    { name: "Colômbia", flag: "🇨🇴", code: "co" }
   ],
   "Grupo L": [
-    { name: "Inglaterra", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
-    { name: "Croácia", flag: "🇭🇷" },
-    { name: "Gana", flag: "🇬🇭" },
-    { name: "Panamá", flag: "🇵🇦" }
+    { name: "Inglaterra", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", code: "gb-eng" },
+    { name: "Croácia", flag: "🇭🇷", code: "hr" },
+    { name: "Gana", flag: "🇬🇭", code: "gh" },
+    { name: "Panamá", flag: "🇵🇦", code: "pa" }
   ]
 };
 
