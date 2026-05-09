@@ -196,6 +196,20 @@ export default function ConfirmationStep({ data }: { data: EntryData }) {
               <span className="font-bold text-white text-sm text-right max-w-[55%]">{data[row.key]}</span>
             </div>
           ))}
+          {data.neymarGoesCopa !== null && data.neymarGoesCopa !== undefined && (
+            <div
+              className="flex justify-between items-center px-4 py-3"
+              style={{ background: "rgba(255,255,255,0.02)" }}
+            >
+              <span className="text-white/55 text-sm font-sans">🤔 Neymar vai pra Copa?</span>
+              <span
+                className="font-bold text-sm"
+                style={{ color: data.neymarGoesCopa ? "#00C851" : "#FF6666" }}
+              >
+                {data.neymarGoesCopa ? "✅ SIM" : "❌ NÃO"}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

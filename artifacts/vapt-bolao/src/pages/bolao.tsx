@@ -17,6 +17,7 @@ export type EntryData = {
   topScorer: string;
   bestPlayer: string;
   bestGoalkeeper: string;
+  neymarGoesCopa: boolean | null;
 };
 
 const STORAGE_KEY = "vapt-bolao-entry";

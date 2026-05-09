@@ -43,6 +43,9 @@ export default function PredictionsStep({
   const [topScorer, setTopScorer] = useState(initialData.topScorer || "");
   const [bestPlayer, setBestPlayer] = useState(initialData.bestPlayer || "");
   const [bestGoalkeeper, setBestGoalkeeper] = useState(initialData.bestGoalkeeper || "");
+  const [neymarGoesCopa, setNeymarGoesCopa] = useState<boolean | null>(
+    initialData.neymarGoesCopa !== undefined ? initialData.neymarGoesCopa : null
+  );
 
   const stateMap: Record<string, [string, (v: string) => void]> = {
     champion: [champion, setChampion],
@@ -70,7 +73,7 @@ export default function PredictionsStep({
   };
 
   const handleSubmit = () => {
-    if (isFormValid()) onNext({ groupPicks, champion, runnerUp, topScorer, bestPlayer, bestGoalkeeper });
+    if (isFormValid()) onNext({ groupPicks, champion, runnerUp, topScorer, bestPlayer, bestGoalkeeper, neymarGoesCopa });
   };
 
   return (
@@ -240,6 +243,64 @@ export default function PredictionsStep({
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Pergunta bônus — Neymar */}
+      <div
+        className="rounded-2xl border overflow-hidden"
+        style={{ borderColor: "rgba(255,215,0,0.2)" }}
+      >
+        <div
+          className="px-4 py-3 flex items-center gap-2"
+          style={{ background: "rgba(255,215,0,0.07)", borderBottom: "1px solid rgba(255,215,0,0.12)" }}
+        >
+          <span className="text-xl">🤔</span>
+          <span className="font-display text-xl text-white">Pergunta Bônus</span>
+          <span className="ml-auto text-xs font-sans" style={{ color: "rgba(255,215,0,0.6)" }}>valha um ponto extra!</span>
+        </div>
+
+        <div className="p-5" style={{ background: "rgba(255,255,255,0.02)" }}>
+          <p className="text-white font-bold text-lg text-center mb-4">
+            🇧🇷 Neymar vai pra Copa 2026?
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setNeymarGoesCopa(true)}
+              className="h-14 rounded-xl font-bold text-lg transition-all border-2"
+              style={{
+                borderColor: neymarGoesCopa === true ? "#00C851" : "rgba(255,255,255,0.12)",
+                background: neymarGoesCopa === true ? "rgba(0,200,81,0.2)" : "rgba(255,255,255,0.04)",
+                color: neymarGoesCopa === true ? "#00C851" : "rgba(255,255,255,0.6)",
+                boxShadow: neymarGoesCopa === true ? "0 0 16px rgba(0,200,81,0.3)" : "none",
+                transform: neymarGoesCopa === true ? "scale(1.03)" : "scale(1)",
+              }}
+            >
+              ✅ SIM
+            </button>
+            <button
+              type="button"
+              onClick={() => setNeymarGoesCopa(false)}
+              className="h-14 rounded-xl font-bold text-lg transition-all border-2"
+              style={{
+                borderColor: neymarGoesCopa === false ? "#FF4444" : "rgba(255,255,255,0.12)",
+                background: neymarGoesCopa === false ? "rgba(255,68,68,0.2)" : "rgba(255,255,255,0.04)",
+                color: neymarGoesCopa === false ? "#FF6666" : "rgba(255,255,255,0.6)",
+                boxShadow: neymarGoesCopa === false ? "0 0 16px rgba(255,68,68,0.3)" : "none",
+                transform: neymarGoesCopa === false ? "scale(1.03)" : "scale(1)",
+              }}
+            >
+              ❌ NÃO
+            </button>
+          </div>
+          {neymarGoesCopa !== null && (
+            <p className="text-center text-xs mt-3 font-sans" style={{ color: "rgba(255,255,255,0.4)" }}>
+              {neymarGoesCopa
+                ? "Torce para ele voltar! 🙏"
+                : "Aposentadoria confirmada em 2025... 😢"}
+            </p>
+          )}
         </div>
       </div>
 
