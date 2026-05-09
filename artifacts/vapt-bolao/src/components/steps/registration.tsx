@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { EntryData } from "@/pages/bolao";
+import { supabase } from "@/lib/supabase";
 
 const schema = z.object({
   name:     z.string().min(2, "Nome é obrigatório"),
@@ -19,6 +20,23 @@ const PRIZES = [
   { icon: "🧤", label: "Melhor Goleiro",              value: "Cupom R$30"  },
 ];
 
+function rowToEntry(row: Record<string, unknown>): Partial<EntryData> {
+  return {
+    name:           row.name as string,
+    email:          row.email as string,
+    whatsapp:       row.whatsapp as string,
+    couponCode:     row.coupon_code as string,
+    timestamp:      row.timestamp as number,
+    groupPicks:     (row.group_picks as Record<string, string[]>) || {},
+    champion:       (row.champion as string)       || "",
+    runnerUp:       (row.runner_up as string)      || "",
+    topScorer:      (row.top_scorer as string)     || "",
+    bestPlayer:     (row.best_player as string)    || "",
+    bestGoalkeeper: (row.best_goalkeeper as string)|| "",
+    neymarGoesCopa: row.neymar_goes_copa as boolean | null,
+  };
+}
+
 export default function RegistrationStep({
   onNext,
   initialData,
@@ -27,6 +45,10 @@ export default function RegistrationStep({
   initialData: Partial<EntryData>;
 }) {
   const [loading, setLoading] = useState(false);
+  const [recovering, setRecovering] = useState(false);
+  const [recoverEmail, setRecoverEmail] = useState("");
+  const [recoverError, setRecoverError] = useState("");
+  const [showRecover, setShowRecover] = useState(false);
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
@@ -49,6 +71,26 @@ export default function RegistrationStep({
     const couponCode = initialData.couponCode || generateCoupon();
     onNext({ ...values, couponCode, timestamp: initialData.timestamp || Date.now() });
     setLoading(false);
+  };
+
+  const handleRecover = async () => {
+    if (!recoverEmail || !supabase) return;
+    setRecovering(true);
+    setRecoverError("");
+    const { data: row } = await supabase
+      .from("bolao_entries")
+      .select("*")
+      .eq("email", recoverEmail.trim().toLowerCase())
+      .maybeSingle();
+    if (!row) {
+      setRecoverError("Nenhum palpite encontrado com esse e-mail.");
+      setRecovering(false);
+      return;
+    }
+    const entry = rowToEntry(row);
+    const completed = row.completed && Object.keys(row.group_picks || {}).length > 0;
+    onNext(entry, completed ? 3 : 2);
+    setRecovering(false);
   };
 
   const inputStyle = {
@@ -120,6 +162,57 @@ export default function RegistrationStep({
           </form>
         </Form>
       </div>
+
+      {/* Recuperar palpites */}
+      {!showRecover ? (
+        <button
+          type="button"
+          onClick={() => setShowRecover(true)}
+          className="w-full text-center text-sm transition-colors hover:opacity-80"
+          style={{ color: "#0057FF" }}
+        >
+          Já participei — ver meus palpites
+        </button>
+      ) : (
+        <div
+          className="rounded-2xl p-5 border space-y-3"
+          style={{ background: "rgba(0,87,255,0.07)", borderColor: "rgba(0,87,255,0.25)" }}
+        >
+          <p className="text-white/70 text-sm text-center font-semibold">
+            🔍 Digite o e-mail que usou no cadastro
+          </p>
+          <input
+            type="email"
+            value={recoverEmail}
+            onChange={e => { setRecoverEmail(e.target.value); setRecoverError(""); }}
+            onKeyDown={e => e.key === "Enter" && handleRecover()}
+            placeholder="seu@email.com"
+            className="w-full h-12 px-4 rounded-xl text-white text-center border"
+            style={{ background: "rgba(255,255,255,0.07)", borderColor: "rgba(255,255,255,0.15)", outline: "none" }}
+          />
+          {recoverError && (
+            <p className="text-red-400 text-xs text-center">{recoverError}</p>
+          )}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => { setShowRecover(false); setRecoverError(""); setRecoverEmail(""); }}
+              className="flex-1 h-11 rounded-xl text-sm font-semibold text-white/50 border border-white/10 hover:text-white transition-all"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleRecover}
+              disabled={recovering || !recoverEmail}
+              className="flex-1 h-11 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90"
+              style={{ background: "#0057FF", opacity: recovering || !recoverEmail ? 0.6 : 1 }}
+            >
+              {recovering ? "Buscando..." : "Recuperar"}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Premiações */}
       <div>
