@@ -4,6 +4,7 @@ import RegistrationStep from "@/components/steps/registration";
 import PredictionsStep from "@/components/steps/predictions";
 import ConfirmationStep from "@/components/steps/confirmation";
 import Layout from "@/components/layout";
+import { saveEntry } from "@/lib/supabase";
 
 export type EntryData = {
   name: string;
@@ -45,10 +46,43 @@ export default function BolaoApp() {
     const newData = { ...entryData, ...data };
     setEntryData(newData);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newData));
+    return newData;
   };
 
   const handleNextStep = (data: Partial<EntryData>) => {
-    updateData(data);
+    const newData = updateData(data);
+
+    // Passo 1 → salva lead imediatamente (parcial)
+    if (step === 1 && newData.email) {
+      saveEntry({
+        name: newData.name!,
+        email: newData.email!,
+        whatsapp: newData.whatsapp!,
+        coupon_code: newData.couponCode!,
+        timestamp: newData.timestamp!,
+        completed: false,
+      });
+    }
+
+    // Passo 2 → salva palpite completo
+    if (step === 2 && newData.email) {
+      saveEntry({
+        name: newData.name!,
+        email: newData.email!,
+        whatsapp: newData.whatsapp!,
+        coupon_code: newData.couponCode!,
+        timestamp: newData.timestamp!,
+        group_picks: newData.groupPicks,
+        champion: newData.champion,
+        runner_up: newData.runnerUp,
+        top_scorer: newData.topScorer,
+        best_player: newData.bestPlayer,
+        best_goalkeeper: newData.bestGoalkeeper,
+        neymar_goes_copa: newData.neymarGoesCopa ?? null,
+        completed: true,
+      });
+    }
+
     setStep(step + 1);
     window.scrollTo(0, 0);
   };

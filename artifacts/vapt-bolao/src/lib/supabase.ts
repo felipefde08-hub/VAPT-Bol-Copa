@@ -11,13 +11,14 @@ export type BolaoEntry = {
   whatsapp: string;
   coupon_code: string;
   timestamp: number;
-  group_picks: Record<string, string[]>;
-  champion: string;
-  runner_up: string;
-  top_scorer: string;
-  best_player: string;
-  best_goalkeeper: string;
-  neymar_goes_copa: boolean | null;
+  group_picks?: Record<string, string[]>;
+  champion?: string;
+  runner_up?: string;
+  top_scorer?: string;
+  best_player?: string;
+  best_goalkeeper?: string;
+  neymar_goes_copa?: boolean | null;
+  completed?: boolean;
 };
 
 export async function saveEntry(entry: BolaoEntry): Promise<{ error: string | null }> {
