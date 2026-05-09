@@ -14,7 +14,8 @@ const schema = z.object({
 });
 
 const PRIZES = [
-  { icon: "🏆", label: "Acertar o Campeão",          value: "Cupom R$50"       },
+  { icon: "🎁", label: "Só por participar",           value: "Frete Grátis"     },
+  { icon: "🏆", label: "Acertar o Campeão",           value: "20% de desconto"  },
   { icon: "🥈", label: "Acertar o Vice-Campeão",      value: "10% de desconto"  },
   { icon: "⚽", label: "Artilheiro / Melhor Jogador", value: "10% de desconto"  },
   { icon: "🧤", label: "Melhor Goleiro",              value: "10% de desconto"  },
@@ -105,9 +106,9 @@ export default function RegistrationStep({
         className="rounded-2xl p-4 text-center border"
         style={{ background: "rgba(255,215,0,0.08)", borderColor: "rgba(255,215,0,0.25)" }}
       >
-        <p className="font-bold text-lg" style={{ color: "#FFD700" }}>🎁 É Grátis e já garante Frete Grátis!</p>
+        <p className="font-bold text-lg" style={{ color: "#FFD700" }}>🎁 Só por participar: Frete Grátis!</p>
         <p className="text-white/55 text-sm mt-1">
-          Preencha seus dados, faça seus palpites e ganhe cupons exclusivos VAPT.
+          Acerte o Campeão e ganhe 20% OFF. Palpites certos valem ainda mais!
         </p>
       </div>
 

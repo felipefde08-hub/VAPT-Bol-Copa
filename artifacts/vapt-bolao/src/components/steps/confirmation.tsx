@@ -97,7 +97,7 @@ export default function ConfirmationStep({ data }: { data: EntryData }) {
             className="text-xs font-bold tracking-[0.3em] uppercase mb-3 font-sans"
             style={{ color: "rgba(255,215,0,0.6)" }}
           >
-            Cupom Frete Grátis
+            Cupom Frete Grátis · Válido no app VAPT
           </p>
 
           <div

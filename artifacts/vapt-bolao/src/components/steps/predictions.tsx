@@ -23,11 +23,11 @@ function TeamFlag({ code, name }: { code: string | null; name: string }) {
 }
 
 const SPECIAL_BETS = [
-  { key: "champion",       label: "🏆 Campeão",       prize: "Cupom R$50",      type: "team"    },
-  { key: "runnerUp",       label: "🥈 Vice-Campeão",   prize: "10% desconto",    type: "team"    },
-  { key: "topScorer",      label: "⚽ Artilheiro",     prize: "10% desconto",    type: "player"  },
-  { key: "bestPlayer",     label: "⭐ Melhor Jogador", prize: "10% desconto",    type: "player"  },
-  { key: "bestGoalkeeper", label: "🧤 Melhor Goleiro", prize: "10% desconto",    type: "keeper"  },
+  { key: "champion",       label: "🏆 Campeão",       prize: "20% OFF",      type: "team"    },
+  { key: "runnerUp",       label: "🥈 Vice-Campeão",   prize: "10% OFF",      type: "team"    },
+  { key: "topScorer",      label: "⚽ Artilheiro",     prize: "10% OFF",      type: "player"  },
+  { key: "bestPlayer",     label: "⭐ Melhor Jogador", prize: "10% OFF",      type: "player"  },
+  { key: "bestGoalkeeper", label: "🧤 Melhor Goleiro", prize: "10% OFF",      type: "keeper"  },
 ] as const;
 
 export default function PredictionsStep({
