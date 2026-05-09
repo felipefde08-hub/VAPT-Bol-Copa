@@ -7,7 +7,7 @@ const VAPT_SITE = "https://vaptbr.com";
 
 const STEP_LABELS = ["Cadastro", "Palpites", "Cupom"];
 
-export default function Layout({ children, step }: { children: React.ReactNode; step: number }) {
+export default function Layout({ children, step, onBack }: { children: React.ReactNode; step: number; onBack?: () => void }) {
   const progressValue = step === 1 ? 33 : step === 2 ? 66 : 100;
   const [logoError, setLogoError] = useState(false);
   const [participants, setParticipants] = useState(0);
@@ -51,6 +51,14 @@ export default function Layout({ children, step }: { children: React.ReactNode; 
 
       {/* Header */}
       <header className="pt-10 pb-6 px-4 text-center relative z-10">
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="absolute left-4 top-4 flex items-center gap-1 text-white/50 hover:text-white transition-colors text-sm font-sans"
+          >
+            ← Voltar
+          </button>
+        )}
         {/* Logo */}
         <div className="flex justify-center mb-4">
           <a href={VAPT_SITE} target="_blank" rel="noopener noreferrer" className="inline-block">

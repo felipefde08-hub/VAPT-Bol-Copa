@@ -49,6 +49,11 @@ export default function BolaoApp() {
     return newData;
   };
 
+  const handlePrevStep = () => {
+    setStep(s => Math.max(1, s - 1));
+    window.scrollTo(0, 0);
+  };
+
   const handleNextStep = (data: Partial<EntryData>) => {
     const newData = updateData(data);
 
@@ -88,7 +93,7 @@ export default function BolaoApp() {
   };
 
   return (
-    <Layout step={step}>
+    <Layout step={step} onBack={step > 1 ? handlePrevStep : undefined}>
       <AnimatePresence mode="wait">
         <motion.div
           key={step}
