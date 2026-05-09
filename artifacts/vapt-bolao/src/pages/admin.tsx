@@ -20,41 +20,21 @@ type Entry = {
   created_at: string;
 };
 
+const ADMIN_KEY = "vapt-admin-authed";
+
 /* ─── Login ─────────────────────────────────────── */
 function LoginScreen({ onLogin }: { onLogin: () => void }) {
-  const [step, setStep] = useState<"email" | "otp">("email");
-  const [email, setEmail] = useState(ADMIN_EMAIL);
-  const [otp, setOtp] = useState("");
+  const [email, setEmail] = useState("");
   const [err, setErr] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const inputStyle: React.CSSProperties = {
-    width: "100%", height: "48px", borderRadius: "12px",
-    background: "rgba(255,255,255,0.07)", border: "2px solid rgba(255,255,255,0.15)",
-    color: "#fff", padding: "0 16px", fontSize: "15px", outline: "none",
-    textAlign: "center",
-  };
-
-  const sendOtp = async () => {
-    if (!supabase) return;
-    if (email.toLowerCase() !== ADMIN_EMAIL) { setErr("Acesso não autorizado."); return; }
-    setErr(""); setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { shouldCreateUser: false },
-    });
-    if (error) { setErr("Erro ao enviar código. Tente novamente."); }
-    else { setStep("otp"); }
-    setLoading(false);
-  };
-
-  const verifyOtp = async () => {
-    if (!supabase) return;
-    setErr(""); setLoading(true);
-    const { error } = await supabase.auth.verifyOtp({ email, token: otp, type: "email" });
-    if (error) { setErr("Código incorreto ou expirado."); }
-    else { onLogin(); }
-    setLoading(false);
+  const handleSubmit = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    if (email.trim().toLowerCase() === ADMIN_EMAIL) {
+      localStorage.setItem(ADMIN_KEY, "1");
+      onLogin();
+    } else {
+      setErr("E-mail não autorizado.");
+    }
   };
 
   return (
@@ -76,37 +56,28 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
           <p className="text-white/40 text-sm mt-1">Bolão Copa 2026 · VAPT</p>
         </div>
 
-        {step === "email" ? (
-          <div className="space-y-4">
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-              placeholder="seu@email.com" style={inputStyle} />
-            {err && <p className="text-red-400 text-sm text-center">{err}</p>}
-            <button onClick={sendOtp} disabled={loading}
-              className="w-full h-12 rounded-xl font-bold text-white transition-all hover:opacity-90"
-              style={{ background: "#0057FF", opacity: loading ? 0.6 : 1 }}>
-              {loading ? "Enviando..." : "📧 Enviar código no e-mail"}
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <p className="text-white/60 text-sm text-center">
-              Código enviado para <span className="text-white font-bold">{email}</span>.<br/>
-              Verifique sua caixa de entrada.
-            </p>
-            <input type="text" value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, ""))}
-              placeholder="000000" maxLength={6} style={{ ...inputStyle, fontSize: "24px", letterSpacing: "8px" }} />
-            {err && <p className="text-red-400 text-sm text-center">{err}</p>}
-            <button onClick={verifyOtp} disabled={loading || otp.length < 6}
-              className="w-full h-12 rounded-xl font-bold text-white transition-all hover:opacity-90"
-              style={{ background: "#0057FF", opacity: loading || otp.length < 6 ? 0.6 : 1 }}>
-              {loading ? "Verificando..." : "✓ Entrar"}
-            </button>
-            <button onClick={() => { setStep("email"); setOtp(""); setErr(""); }}
-              className="w-full text-sm text-white/40 hover:text-white/70 transition-colors">
-              ← Reenviar código
-            </button>
-          </div>
-        )}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="email"
+            value={email}
+            onChange={e => { setEmail(e.target.value); setErr(""); }}
+            placeholder="seu@email.com"
+            autoFocus
+            style={{
+              width: "100%", height: "48px", borderRadius: "12px",
+              background: "rgba(255,255,255,0.07)", border: "2px solid rgba(255,255,255,0.15)",
+              color: "#fff", padding: "0 16px", fontSize: "15px", outline: "none",
+            }}
+          />
+          {err && <p className="text-red-400 text-sm text-center">{err}</p>}
+          <button
+            type="submit"
+            className="w-full h-12 rounded-xl font-bold text-white transition-all hover:opacity-90"
+            style={{ background: "#0057FF" }}
+          >
+            Entrar
+          </button>
+        </form>
       </div>
     </div>
   );
@@ -334,41 +305,12 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
 
 /* ─── Página principal ───────────────────────────── */
 export default function AdminPage() {
-  const [authed, setAuthed] = useState(false);
-  const [checking, setChecking] = useState(true);
+  const [authed, setAuthed] = useState(() => localStorage.getItem(ADMIN_KEY) === "1");
 
-  useEffect(() => {
-    if (!supabase) { setChecking(false); return; }
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setAuthed(session?.user?.email === ADMIN_EMAIL);
-      setChecking(false);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      setAuthed(session?.user?.email === ADMIN_EMAIL);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleLogout = async () => {
-    await supabase?.auth.signOut();
+  const handleLogout = () => {
+    localStorage.removeItem(ADMIN_KEY);
     setAuthed(false);
   };
-
-  if (checking) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0a0a1a" }}>
-        <span className="text-white/40 text-sm">Verificando acesso...</span>
-      </div>
-    );
-  }
-
-  if (!supabase) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0a0a1a" }}>
-        <span className="text-red-400 text-sm">Supabase não configurado.</span>
-      </div>
-    );
-  }
 
   return authed
     ? <Dashboard onLogout={handleLogout} />
